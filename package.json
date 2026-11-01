@@ -1,0 +1,22 @@
+{
+  "name": "blackwolf-technologies",
+  "version": "1.0.0",
+  "description": "BlackWolf Technologies company website with frontend and backend API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "blackwolf",
+    "company",
+    "website",
+    "express",
+    "startup"
+  ],
+  "author": "BlackWolf Technologies",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

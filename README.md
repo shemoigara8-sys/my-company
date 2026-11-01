@@ -1,15 +1,46 @@
 # BlackWolf Technologies
 
-A modern company website for a technology business focused on AI, automation, document systems, and digital transformation.
+A modern company website with a frontend landing page and an Express backend API.
+
+## Features
+
+- Responsive landing page for BlackWolf Technologies
+- Product and service sections
+- Contact form connected to a backend API
+- Health check endpoint and service data API
+- Ready to run locally with Node.js and Express
 
 ## Run locally
 
-Open `index.html` in a browser, or serve the folder using any static file server.
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Start the app:
+   ```bash
+   npm start
+   ```
+3. Open the website in a browser:
+   ```bash
+   http://localhost:3000
+   ```
 
-Example:
+## API endpoints
 
-```bash
-python3 -m http.server 8000
+- GET `/api/health`
+- GET `/api/services`
+- POST `/api/contact`
+
+## Project structure
+
+```text
+.
+├── public/
+│   ├── index.html
+│   ├── styles.css
+│   └── script.js
+├── server.js
+├── package.json
+├── .gitignore
+└── README.md
 ```
-
-Then visit `http://localhost:8000`.
