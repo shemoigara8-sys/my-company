@@ -416,6 +416,42 @@ img {
   color: var(--muted);
 }
 
+.foundation-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.foundation-card {
+  background: rgba(8, 18, 31, 0.7);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 1.2rem 1rem;
+  min-height: 190px;
+}
+
+.foundation-tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+}
+
+.foundation-card h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1.2rem;
+}
+
+.foundation-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.96rem;
+}
+
 .feature-list {
   display: grid;
   gap: 1.2rem;
@@ -778,8 +814,13 @@ th {
 @media (max-width: 980px) {
   .hero-grid,
   .two-column,
-  .admin-layout {
+  .admin-layout,
+  .foundation-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .foundation-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .card-grid,
@@ -821,6 +862,7 @@ th {
   .hero-grid,
   .two-column,
   .card-grid,
+  .foundation-grid,
   .pricing-grid,
   .steps-grid,
   .cta-wrap,
