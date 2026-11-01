@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BlackWolf Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="admin-shell">
+      <div class="admin-card">
+        <div class="dashboard-header">
+          <div>
+            <span class="eyebrow">SaaS Dashboard</span>
+            <h2>BlackWolf Control Center</h2>
+          </div>
+          <button id="logoutBtn" class="btn secondary" type="button">Logout</button>
+        </div>
+
+        <div id="dashboardStatus" class="form-status" aria-live="polite"></div>
+
+        <div class="dashboard-grid">
+          <div class="metric-card">
+            <strong id="totalProducts">0</strong>
+            <span>Products</span>
+          </div>
+          <div class="metric-card">
+            <strong id="totalLeads">0</strong>
+            <span>Leads</span>
+          </div>
+          <div class="metric-card">
+            <strong id="recentLeads">0</strong>
+            <span>Leads in 7 days</span>
+          </div>
+        </div>
+
+        <div class="admin-layout">
+          <section>
+            <h3>Add Product</h3>
+            <form id="productForm" class="admin-form">
+              <label>
+                <span>Product Name</span>
+                <input type="text" name="name" required />
+              </label>
+
+              <label>
+                <span>Category</span>
+                <input type="text" name="category" placeholder="AI, Docs, Workflow..." />
+              </label>
+
+              <label>
+                <span>Price</span>
+                <input type="number" name="price" min="0" step="100" value="0" />
+              </label>
+
+              <label>
+                <span>Status</span>
+                <select name="status">
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Description</span>
+                <textarea name="description" rows="5" required></textarea>
+              </label>
+
+              <button type="submit" class="btn primary">Create Product</button>
+            </form>
+          </section>
+
+          <section>
+            <h3>Products</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="productsTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <section style="margin-top: 2rem;">
+          <h3>Leads</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Company</th>
+                  <th>Project</th>
+                  <th>Message</th>
+                </tr>
+              </thead>
+              <tbody id="leadsTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const totalProductsEl = document.getElementById('totalProducts');
+      const totalLeadsEl = document.getElementById('totalLeads');
+      const recentLeadsEl = document.getElementById('recentLeads');
+      const productsTableBody = document.getElementById('productsTableBody');
+      const leadsTableBody = document.getElementById('leadsTableBody');
+      const dashboardStatus = document.getElementById('dashboardStatus');
+      const productForm = document.getElementById('productForm');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      async function apiFetch(url, options = {}) {
+        const response = await fetch(url, {
+          credentials: 'same-origin',
+          ...options,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {})
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Request failed.');
+        }
+
+        return data;
+      }
+
+      async function loadDashboard() {
+        try {
+          const summary = await apiFetch('/api/admin/summary');
+          totalProductsEl.textContent = summary.summary.totalProducts;
+          totalLeadsEl.textContent = summary.summary.totalLeads;
+          recentLeadsEl.textContent = summary.summary.recentLeads;
+
+          const productsData = await apiFetch('/api/admin/products');
+          productsTableBody.innerHTML = (productsData.products || [])
+            .map(
+              (product) => `
+                <tr>
+                  <td>${product.name}</td>
+                  <td>${product.category || 'General'}</td>
+                  <td>KES ${Number(product.price || 0).toLocaleString()}</td>
+                  <td><span class="status-pill ${product.status || 'active'}">${product.status || 'active'}</span></td>
+                  <td><button class="btn delete-btn" data-id="${product.id}" type="button">Delete</button></td>
+                </tr>
+              `
+            )
+            .join('');
+
+          const leadsData = await apiFetch('/api/admin/contacts');
+          leadsTableBody.innerHTML = (leadsData.contacts || [])
+            .map(
+              (lead) => `
+                <tr>
+                  <td>${lead.name}</td>
+                  <td>${lead.email}</td>
+                  <td>${lead.company || 'N/A'}</td>
+                  <td>${lead.project_type || 'N/A'}</td>
+                  <td>${lead.message}</td>
+                </tr>
+              `
+            )
+            .join('');
+
+          document.querySelectorAll('.delete-btn').forEach((button) => {
+            button.addEventListener('click', async () => {
+              const id = button.dataset.id;
+              try {
+                await apiFetch(`/api/admin/products/${id}`, { method: 'DELETE' });
+                dashboardStatus.textContent = 'Product deleted.';
+                dashboardStatus.style.color = '#7ef0b3';
+                loadDashboard();
+              } catch (error) {
+                dashboardStatus.textContent = error.message;
+                dashboardStatus.style.color = '#ff9bb2';
+              }
+            });
+          });
+        } catch (error) {
+          dashboardStatus.textContent = error.message;
+          dashboardStatus.style.color = '#ff9bb2';
+          if (error.message.toLowerCase().includes('authentication required')) {
+            window.location.href = '/login';
+          }
+        }
+      }
+
+      productForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const formData = new FormData(productForm);
+        const payload = Object.fromEntries(formData.entries());
+
+        try {
+          const result = await apiFetch('/api/admin/products', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+
+          dashboardStatus.textContent = result.message;
+          dashboardStatus.style.color = '#7ef0b3';
+          productForm.reset();
+          loadDashboard();
+        } catch (error) {
+          dashboardStatus.textContent = error.message;
+          dashboardStatus.style.color = '#ff9bb2';
+        }
+      });
+
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          await apiFetch('/api/auth/logout', { method: 'POST' });
+          window.location.href = '/login';
+        } catch (error) {
+          console.error(error);
+          window.location.href = '/login';
+        }
+      });
+
+      loadDashboard();
+    </script>
+  </body>
+</html>

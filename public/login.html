@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BlackWolf Admin Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="login-shell">
+      <div class="auth-card">
+        <div class="auth-header">
+          <div>
+            <span class="eyebrow">BlackWolf Admin</span>
+            <h2>Secure Login</h2>
+          </div>
+          <a href="/" class="btn secondary">Back to site</a>
+        </div>
+
+        <form id="loginForm" class="auth-form">
+          <label>
+            <span>Email</span>
+            <input type="email" name="email" placeholder="admin@blackwolftechnologies.com" required />
+          </label>
+
+          <label>
+            <span>Password</span>
+            <input type="password" name="password" placeholder="Enter password" required />
+          </label>
+
+          <button type="submit" class="btn primary">Login to Dashboard</button>
+          <p id="loginStatus" class="form-status" aria-live="polite"></p>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      const loginForm = document.getElementById('loginForm');
+      const loginStatus = document.getElementById('loginStatus');
+
+      loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(loginForm);
+        const payload = Object.fromEntries(formData.entries());
+
+        try {
+          const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(result.message || 'Unable to login.');
+          }
+
+          window.location.href = '/admin';
+        } catch (error) {
+          loginStatus.textContent = error.message;
+          loginStatus.style.color = '#ff9bb2';
+        }
+      });
+    </script>
+  </body>
+</html>

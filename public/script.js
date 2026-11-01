@@ -28,24 +28,27 @@ async function loadServices() {
   if (!servicesList) return;
 
   try {
-    const response = await fetch('/api/services');
+    const response = await fetch('/api/products');
     const data = await response.json();
 
-    servicesList.innerHTML = (data.services || [])
+    const products = data.products || [];
+    if (products.length === 0) {
+      throw new Error('No products');
+    }
+
+    servicesList.innerHTML = products
       .map(
-        (service) => `
+        (product) => `
           <article class="info-card reveal">
-            <div class="icon">${service.name.split(' ').map((word) => word[0]).slice(0, 2).join('').toUpperCase()}</div>
-            <h3>${service.name}</h3>
-            <p>${service.description}</p>
+            <div class="icon">${product.name.split(' ').map((word) => word[0]).slice(0, 2).join('').toUpperCase()}</div>
+            <h3>${product.name}</h3>
+            <p>${product.description}</p>
           </article>
         `
       )
       .join('');
 
-    document.querySelectorAll('.reveal').forEach((element) => {
-      observer.observe(element);
-    });
+    document.querySelectorAll('.reveal').forEach((element) => observer.observe(element));
   } catch (error) {
     servicesList.innerHTML = `
       <article class="info-card reveal">
